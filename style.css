@@ -1,0 +1,54 @@
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #f4f4f4;
+}
+
+
+.login-container {
+  width: 300px;
+  margin: 100px auto;
+  background: white;
+  padding: 20px;
+  text-align: center;
+  border-radius: 8px;
+}
+
+input {
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+button {
+  padding: 10px;
+  background: #064e3b;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.sidebar {
+  width: 200px;
+  height: 100vh;
+  background: #064e3b;
+  color: white;
+  position: fixed;
+  padding: 10px;
+}
+
+.sidebar button {
+  width: 100%;
+  margin: 5px 0;
+}
+
+.main {
+  margin-left: 210px;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+}
