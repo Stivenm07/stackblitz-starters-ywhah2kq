@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediGestión EPS · Portal del Afiliado</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%2306b6d4'/><path d='M40 20h20v20h20v20H60v20H40V60H20V40h20z' fill='white'/></svg>">
+</head>
+<body>
+<main class="login-page">
+  <section class="login-hero">
+    <div class="brand">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="#fff"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></svg></div>
+      <div>MediGestión <small>EPS · Portal del afiliado</small></div>
+    </div>
+
+    <div class="hero-copy">
+      <h1>Tu salud, <span>en un solo lugar</span>, las 24 horas.</h1>
+      <p>Consulta tu historia clínica, agenda citas médicas, revisa resultados de laboratorio y radica tus PQRS sin filas ni llamadas.</p>
+      <div class="hero-features">
+        <div class="hero-feature"><i>📋</i> Historia clínica digital</div>
+        <div class="hero-feature"><i>📅</i> Agenda de citas en línea</div>
+        <div class="hero-feature"><i>🧪</i> Resultados de laboratorio</div>
+        <div class="hero-feature"><i>💬</i> PQRS con seguimiento</div>
+      </div>
+    </div>
+
+    <svg class="ecg" viewBox="0 0 800 90" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 50 H180 L200 50 L215 20 L235 80 L250 10 L268 70 L280 50 H420 L440 50 L455 25 L475 78 L490 12 L508 68 L520 50 H800"/>
+    </svg>
+
+    <div class="hero-foot">Vigilado Supersalud · Línea de atención 24/7: 601 555 0123 · Este es un portal de demostración con datos ficticios.</div>
+  </section>
+
+  <section class="login-panel">
+    <div class="login-card">
+      <h2>Iniciar sesión</h2>
+      <p class="muted">Ingresa con tu documento de identidad y tu contraseña.</p>
+
+      <div id="msg" class="alert hidden" role="alert"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label for="tipo">Tipo de documento</label>
+          <select id="tipo">
+            <option value="CC">Cédula de ciudadanía</option>
+            <option value="CE">Cédula de extranjería</option>
+            <option value="TI">Tarjeta de identidad</option>
+            <option value="PA">Pasaporte</option>
+            <option value="PPT">Permiso por Protección Temporal</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="cedula">Número de documento</label>
+          <input id="cedula" inputmode="numeric" autocomplete="username" placeholder="Ej. 1012345678" required>
+        </div>
+        <div class="field">
+          <label for="clave">Contraseña</label>
+          <div class="input-wrap">
+            <input id="clave" type="password" autocomplete="current-password" placeholder="••••••••" required>
+            <button type="button" id="toggle">Mostrar</button>
+          </div>
+        </div>
+        <div class="row-between" style="margin-bottom:20px">
+          <label class="check"><input type="checkbox" id="recordar"> Recordar documento</label>
+          <button type="button" class="link-btn" id="olvido">¿Olvidaste tu contraseña?</button>
+        </div>
+        <button class="btn btn-primary btn-block" id="btnIngresar" type="submit">Ingresar al portal</button>
+      </form>
+
+      <div class="login-help">
+        <div>🚑 <strong>Urgencias:</strong> 123</div>
+        <div>📞 <strong>Línea MediGestión:</strong> 601 555 0123</div>
+        <div>💬 <strong>WhatsApp:</strong> 310 555 0199</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const msg = (text, type = "error") => { const m = $("msg"); m.className = "alert alert-" + type; m.textContent = text; };
+
+  fetch("/api/auth/me").then((r) => { if (r.ok) location.replace("/portal"); });
+
+  const saved = localStorage.getItem("mg_doc");
+  if (saved) { $("cedula").value = saved; $("recordar").checked = true; }
+
+  $("toggle").onclick = () => {
+    const c = $("clave");
+    c.type = c.type === "password" ? "text" : "password";
+    $("toggle").textContent = c.type === "password" ? "Mostrar" : "Ocultar";
+  };
+
+  $("olvido").onclick = () => msg("Para restablecer tu contraseña comunícate con la Línea MediGestión 601 555 0123 o acércate a tu IPS con tu documento.", "info");
+
+  $("loginForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const cedula = $("cedula").value.trim();
+    const clave = $("clave").value;
+    if (!cedula || !clave) return msg("Ingresa tu número de documento y contraseña.");
+    const btn = $("btnIngresar");
+    btn.disabled = true; btn.textContent = "Verificando…";
+    try {
+      const r = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cedula, clave }) });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || "No fue posible iniciar sesión.");
+      if ($("recordar").checked) localStorage.setItem("mg_doc", cedula); else localStorage.removeItem("mg_doc");
+      msg("Acceso concedido. Cargando tu portal…", "ok");
+      location.replace("/portal");
+    } catch (err) {
+      msg(err.message);
+      btn.disabled = false; btn.textContent = "Ingresar al portal";
+    }
+  };
+</script>
+</body>
+</html>
